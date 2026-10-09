@@ -5,17 +5,28 @@ import viteLogo from './assets/vite.svg'
 import './App.css'
 
 function App() {
-  const [input, setInput] = useState("")
+  const [name, setName] = useState("")
+  const [author, setAuthor] = useState("")
+  const [hideDone, setHideDone] = useState(false)
   const [books, setBooks] = useState([])
   const addBook = () => {
     let uuid = self.crypto.randomUUID();
     let newBook = {
       id: uuid,
       done: false,
-      title: input,
-      author: input
+      title: name,
+      author: author
     }
     setBooks(e=>[...e, newBook])
+  }
+  const deleteBook = (id) => {
+    setBooks(b=>b.filter(e => e.id === id ? console.log(`delete ${id}`) : e))
+  }
+  const markAsDoneBook = (id) => {
+     setBooks(
+            (b)=>b.map(
+                e=>(e.id === id ? {...e, "done":!e.done} : e))
+        )
   }
   return (
     <>
@@ -41,16 +52,23 @@ function App() {
           className="input"
           id="bookInput"
           placeholder="Название книги..."
-          onChange={e=>setInput(e.target.value)}
+          onChange={e=>setName(e.target.value)}
+        />
+        <input
+          className="input"
+          id="authorInput"
+          placeholder="Имя автора..."
+          onChange={e=>setAuthor(e.target.value)}
         />
         <button className="btn" id="addBtn" onClick={addBook}>
           Добавить на полку
         </button>
       </div>
+      
       <div className="list-toolbar">
         <span className="toolbar-title">Книги</span>
         <div className="filter-chip">
-          <input type="checkbox" id="filterCheckbox" />
+          <input type="checkbox" id="filterCheckbox" onChange={()=>setHideDone(!hideDone)}/>
           <label htmlFor="filterCheckbox">
             <span className="dot" />
             Только непрочитанные
@@ -59,21 +77,23 @@ function App() {
       </div>
       <div className="book-list" id="bookList">
         {books.map(b=>(
-          <div className="book-row" data-id={b.id}>
+          <div className={`book-row ${hideDone & b.done ? "hide":""}`}  data-id={b.id}>
           <div className="book-cover" style={{ background: "#4f6b52" }}>
           </div>
           <div className="book-info">
             <p className={`book-title ${b.done == true ? "done":""}`}>{b.title}</p>
             <div className="book-author">{b.author}</div>
           </div>
-          <div className="read-check checked" data-role="toggle">
+          <span className="read-label">{b.done == true ? "Прочитано!":""}</span>
+          <div className={`read-check ${b.done == true ? "checked":""}`} data-role="toggle" onClick={()=>markAsDoneBook(b.id)}>
             <span className="check-circle">✓</span>
-            <span className="read-label">{b.state}</span>
           </div>
+
           <button
             className="delete-btn"
             data-role="delete"
             title="Убрать с полки"
+            onClick={()=>deleteBook(b.id)}
           >
             ✕
           </button>
